@@ -1,7 +1,7 @@
 local InputService = game:GetService("UserInputService")
 local RunService = game:GetService("RunService")
 
---local Signal = require(script.Parent.Signal)
+local Signal = require(script.Parent.Signal)
 
 local function FlipTransparency(num)
 	return 1 - num
@@ -169,11 +169,11 @@ EFrame.new = function(parent)
 	EFrame._elements.background = background
 
 	local border = Drawing.new("Square")
-	border.Position = Vector2.new(-20, -20)
-	border.Size = Vector2.new(140, 140)
+	border.Position = Vector2.new(-0.5, -0.5)
+	border.Size = Vector2.new(101, 101)
 	border.Filled = false
 	border.Transparency = FlipTransparency(EFrame._properties.BorderTransparency)
-	border.Thickness = 40
+	border.Thickness = 1
 	border.Color = Color3.fromRGB(0, 0, 0)
 	border.ZIndex = 1
 	border.Visible = false
