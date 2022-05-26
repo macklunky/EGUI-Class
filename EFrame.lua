@@ -125,6 +125,7 @@ EFrame.new = function(parent)
 		EFrame._elements.border.Position = EFrame._absolutePosition - (Vector2.new(EFrame.BorderSize, EFrame.BorderSize) / 2)
 		EFrame._elements.border.Color = EFrame.BorderColor
 		EFrame._elements.border.Transparency = FlipTransparency(EFrame.BorderTransparency)
+		EFrame._elements.border.Thickness = EFrame.BorderSize
 		EFrame._elements.border.ZIndex = EFrame.ZIndex
 		
 		local canRender = false
