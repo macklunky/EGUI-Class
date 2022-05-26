@@ -197,6 +197,8 @@ EFrame.new = function(parent)
 
 		__newindex = function(tab, index, value)
 			if index == "Parent" and value ~= nil then
+				print(typeof(value) == "table")
+				print(value._EGUITAG)
 				if typeof(value) ~= "table" or typeof(value) == "table" and value._EGUITAG == nil then
 					error("Attempt to assign invalid object as Parent", 2)
 				end
