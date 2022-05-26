@@ -89,7 +89,7 @@ EGUI.new = function()
 			elseif tab:FindFirstChild(index) then
 				return tab:FindFirstChild(index)
 			else
-				error(index .. " is not a valid member of EFrame", 2)
+				return tab[index]
 			end
 		end,
 
