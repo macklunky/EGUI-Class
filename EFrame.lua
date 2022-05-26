@@ -50,6 +50,7 @@ EFrame.new = function(parent)
 		_methods = {},
 		_events = {},
 		_connections = {},
+		_children = {},
 		_elements = {},
 		_rendered = false,
 		_absolutePosition = Vector2.new(0, 0),
@@ -192,8 +193,8 @@ EFrame.new = function(parent)
 				return tab._properties[index].Value
 			elseif tab._methods[index] ~= nil then
 				return tab._methods[index]
-			elseif tab:FindFirstChild(index) then
-				return tab:FindFirstChild(index)
+			--elseif tab:FindFirstChild(index) then
+				--return tab:FindFirstChild(index)
 			end
 		end,
 
