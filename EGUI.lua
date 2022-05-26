@@ -39,9 +39,9 @@ EGUI.new = function()
 		end
 		name = tostring(name)
 
-		if rawget(EGUI, "_destroyed") == false and EGUI._children[name] then
+		--if rawget(EGUI, "_destroyed") == false and EGUI._children[name] then
 			--return EGUI._children[name]
-		end
+		--end
 		
 		return nil
 	end
