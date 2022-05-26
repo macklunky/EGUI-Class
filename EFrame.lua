@@ -69,9 +69,9 @@ EFrame.new = function(parent)
 		end
 		name = tostring(name)
 		
-		if rawget(EFrame, "_destroyed") == false and EFrame._children[name] then
+		--if rawget(EFrame, "_destroyed") == false and EFrame._children[name] then
 			--return EFrame._children[name]
-		end
+		--end
 		
 		return nil
 	end
