@@ -14,11 +14,16 @@ EGUI.new = function()
 		_properties = {
 			Enabled = {
 				Value = true
+			},
+			ClassName = {
+				Value = "EGUI"
 			}
 		},
 		_methods = {},
 		_events = {},
 		_connections = {},
+		_children = {},
+		_EGUITAG = true,
 		_destroyed = false
 	}
 
@@ -56,10 +61,18 @@ EGUI.new = function()
 		if not tab then
 			error("Expected ':' not '.' calling member function Destroy", 2)
 		end
+		
 		for event, signal in next, tab._events do
 			signal:DisconnectAll()
 		end
+		
+		for index, child in next, tab._children do
+			child:_destroy()
+		end
+
 		tab._children = {}
+
+		tab._destroyed = true
 	end
 
 	setmetatable(EGUI, {
@@ -96,14 +109,19 @@ EGUI.new = function()
 		local lastMousePosition = InputService:GetMouseLocation()
 		while rawget(EGUI, "_destroyed") == false do
 			--update gui mouseenter mouseleave mousemove events
+			for index, child in next, EGUI._children do
+				if child._destroyed == false then
+					child:_renderUpdate()
+				end
+			end
 			local newMousePosition = InputService:GetMouseLocation()
 			if newMousePosition ~= lastMousePosition then
-
-
+				
+				
 				--do stuff
 				--update gui rendering
 				
-
+				
 				lastMousePosition = newMousePosition
 			end
 			RunService.RenderStepped:Wait()
