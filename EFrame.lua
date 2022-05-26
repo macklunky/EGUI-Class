@@ -190,8 +190,6 @@ EFrame.new = function(parent)
 				return tab._properties[index].Value
 			elseif tab._methods[index] ~= nil then
 				return tab._methods[index]
-			elseif tab[index] then
-				return tab[index]
 			elseif tab:FindFirstChild(index) then
 				return tab:FindFirstChild(index)
 			end
@@ -201,7 +199,7 @@ EFrame.new = function(parent)
 			if index == "Parent" and value ~= nil then
 				print(typeof(value) == "table")
 				print(rawget(value, "_EGUITAG"))
-				print("tests")
+				print("test")
 				if typeof(value) ~= "table" or typeof(value) == "table" and rawget(value, "_EGUITAG") == nil then
 					error("Attempt to assign invalid object as Parent", 2)
 				end
