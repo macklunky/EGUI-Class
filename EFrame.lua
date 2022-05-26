@@ -134,7 +134,8 @@ EFrame.new = function(parent)
 			canRender = EFrame.Parent._rendered
 		end
 		EFrame._rendered = canRender and EFrame.Visible or false
-		EFrame._properties.Visible.Value = EFrame._rendered--Visible = EFrame._rendered
+		EFrame._elements.background.Visible = EFrame._rendered
+		EFrame._elements.border.Visible = EFrame._rendered
 		for index, child in next, EFrame._children do
 			child:_renderUpdate()
 		end
@@ -202,7 +203,7 @@ EFrame.new = function(parent)
 			if index == "Parent" and value ~= nil then
 				print(typeof(value) == "table")
 				print(rawget(value, "_EGUITAG"))
-				print("tests")
+				print("test")
 				if typeof(value) ~= "table" or typeof(value) == "table" and rawget(value, "_EGUITAG") == nil then
 					error("Attempt to assign invalid object as Parent", 2)
 				end
