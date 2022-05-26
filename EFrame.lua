@@ -134,7 +134,7 @@ EFrame.new = function(parent)
 			canRender = EFrame.Parent._rendered
 		end
 		EFrame._rendered = canRender and EFrame.Visible or false
-		EFrame.Visible = EFrame._rendered
+		EFrame._properties.Visible.Value = EFrame._rendered--Visible = EFrame._rendered
 		for index, child in next, EFrame._children do
 			child:_renderUpdate()
 		end
