@@ -40,8 +40,10 @@ EGUI.new = function()
 		name = tostring(name)
 
 		if rawget(EGUI, "_destroyed") == false and EGUI._children[name] then
-			return EGUI._children[name]
+			--return EGUI._children[name]
 		end
+		
+		return nil
 	end
 
 	EGUI.GetChildren = function(tab, name)
