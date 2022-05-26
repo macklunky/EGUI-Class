@@ -88,8 +88,6 @@ EGUI.new = function()
 				return tab._methods[index]
 			elseif tab:FindFirstChild(index) then
 				return tab:FindFirstChild(index)
-			else
-				return tab[index]
 			end
 		end,
 
