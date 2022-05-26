@@ -98,7 +98,7 @@ EGUI.new = function()
 				error(index .. " is not a valid member of EFrame", 2)
 			end
 			if tab._properties[index] then
-				tab._properties[index] = value
+				tab._properties[index].Value = value
 			else
 				error(index .. " is not a valid member of EFrame", 2)
 			end
