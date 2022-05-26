@@ -201,7 +201,8 @@ EFrame.new = function(parent)
 			if index == "Parent" and value ~= nil then
 				print(typeof(value) == "table")
 				print(value._EGUITAG)
-				if typeof(value) ~= "table" or typeof(value) == "table" and value._EGUITAG == nil then
+				print("test")
+				if typeof(value) ~= "table" or typeof(value) == "table" and rawget(value, "_EGUITAG") == nil then
 					error("Attempt to assign invalid object as Parent", 2)
 				end
 				tab._properties.Parent.Value = value
