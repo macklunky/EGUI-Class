@@ -190,6 +190,8 @@ EFrame.new = function(parent)
 				return tab._properties[index].Value
 			elseif tab._methods[index] ~= nil then
 				return tab._methods[index]
+			elseif tab[index] then
+				return tab[index]
 			elseif tab:FindFirstChild(index) then
 				return tab:FindFirstChild(index)
 			end
