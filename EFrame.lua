@@ -219,6 +219,8 @@ EFrame.new = function(parent)
 	if parent then
 		EFrame.Parent = parent
 	end
+	
+	return EFrame
 end
 
 return EFrame
