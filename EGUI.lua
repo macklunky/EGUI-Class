@@ -156,6 +156,8 @@ EGUI.new = function()
 			--update mouse3up events with input.Position
 		end
 	end)
+	
+	return EGUI
 end
 
 return EGUI
