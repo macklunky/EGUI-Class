@@ -70,8 +70,10 @@ EFrame.new = function(parent)
 		name = tostring(name)
 		
 		if rawget(EFrame, "_destroyed") == false and EFrame._children[name] then
-			return EFrame._children[name]
+			--return EFrame._children[name]
 		end
+		
+		return nil
 	end
 
 	EFrame.GetChildren = function(tab)
@@ -199,7 +201,7 @@ EFrame.new = function(parent)
 			if index == "Parent" and value ~= nil then
 				print(typeof(value) == "table")
 				print(rawget(value, "_EGUITAG"))
-				print("test")
+				print("testing")
 				if typeof(value) ~= "table" or typeof(value) == "table" and rawget(value, "_EGUITAG") == nil then
 					error("Attempt to assign invalid object as Parent", 2)
 				end
