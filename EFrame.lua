@@ -1,7 +1,9 @@
 local InputService = game:GetService("UserInputService")
 local RunService = game:GetService("RunService")
 
+print"a"
 --local Signal = require(script.Parent.Signal)
+print"b"
 
 local function FlipTransparency(num)
 	return 1 - num
