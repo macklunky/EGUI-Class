@@ -198,7 +198,7 @@ EFrame.new = function(parent)
 		__newindex = function(tab, index, value)
 			if index == "Parent" and value ~= nil then
 				if typeof(value) ~= "table" or typeof(value) == "table" and value._EGUITAG == nil then
-					error("Attempt to assign assign invalid object as Parent", 2)
+					error("Attempt to assign invalid object as Parent", 2)
 				end
 				tab._properties.Parent.Value = value
 				table.insert(value._children, tab)
