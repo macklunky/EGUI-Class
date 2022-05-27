@@ -32,10 +32,10 @@ EText.new = function(parent)
 				Value = 0
 			},
 			TextColor = {
-				Value = Color3.fromRGB(255, 255, 255)
+				Value = Color3.fromRGB(0, 0, 0)
 			},
 			OutlineColor = {
-				Value = Color3.fromRGB(0, 0, 0)
+				Value = Color3.fromRGB(255, 255, 255)
 			},
 			Center = {
 				Value = false
