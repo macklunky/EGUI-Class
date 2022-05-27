@@ -45,6 +45,9 @@ EFrame.new = function(parent)
 			},
 			ClassName = {
 				Value = "EFrame"
+			},
+			Name = {
+				Value = "Frame"
 			}
 		},
 		_methods = {},
@@ -70,6 +73,14 @@ EFrame.new = function(parent)
 		end
 		name = tostring(name)
 		
+		if EFrame._destroyed == false then
+			for index = 1, #EFrame._children do
+				local child = EFrame._children[index]
+				if child.Name == name then
+					return child
+				end
+			end
+		end
 		--if rawget(EFrame, "_destroyed") == false and EFrame._children[name] then
 			--return EFrame._children[name]
 		--end
@@ -195,8 +206,8 @@ EFrame.new = function(parent)
 				return tab._properties[index].Value
 			elseif tab._methods[index] ~= nil then
 				return tab._methods[index]
-			--elseif tab:FindFirstChild(index) then
-				--return tab:FindFirstChild(index)
+			elseif tab:FindFirstChild(index) then
+				return tab:FindFirstChild(index)
 			end
 		end,
 
