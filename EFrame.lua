@@ -148,6 +148,7 @@ EFrame.new = function(parent)
 		EFrame._elements.border.Visible = EFrame._rendered
 		if EFrame._rendered == false then
 			EFrame._mouseOver = false
+			print("rendering")
 		end
 		for index, child in next, EFrame._children do
 			child:_renderUpdate()
