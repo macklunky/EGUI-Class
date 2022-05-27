@@ -81,9 +81,6 @@ EFrame.new = function(parent)
 				end
 			end
 		end
-		--if rawget(EFrame, "_destroyed") == false and EFrame._children[name] then
-			--return EFrame._children[name]
-		--end
 		
 		return nil
 	end
@@ -92,7 +89,7 @@ EFrame.new = function(parent)
 		if not tab then
 			error("Expected ':' not '.' calling member function GetChildren", 2)
 		end
-		if rawget(EFrame, "_destroyed") == false then
+		if EFrame._destroyed == false then
 			local children = {}
 			for index, child in next, EFrame._children do
 				children[index] = child
@@ -213,10 +210,7 @@ EFrame.new = function(parent)
 
 		__newindex = function(tab, index, value)
 			if index == "Parent" and value ~= nil then
-				print(typeof(value) == "table")
-				print(rawget(value, "_EGUITAG"))
-				print("test")
-				if typeof(value) ~= "table" or typeof(value) == "table" and rawget(value, "_EGUITAG") == nil then
+				if typeof(value) ~= "table" or typeof(value) == "table" and value._EGUITAG == nil then
 					error("Attempt to assign invalid object as Parent", 2)
 				end
 				tab._properties.Parent.Value = value
