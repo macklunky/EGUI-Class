@@ -193,7 +193,9 @@ EText.new = function(parent)
 			if typeof(index) ~= "string" and typeof(index) ~= "number" then
 				error(index .. " is not a valid member of EText", 2)
 			end
-			if tab._events[index] ~= nil then
+			if index == "TextBounds" and tab._destroyed == false then
+				return tab._elements.text.TextBounds
+			elseif tab._events[index] ~= nil then
 				return tab._events[index]
 			elseif tab._properties[index] ~= nil then
 				return tab._properties[index].Value
