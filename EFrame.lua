@@ -1,7 +1,7 @@
 local InputService = game:GetService("UserInputService")
 local RunService = game:GetService("RunService")
 
---local Signal = require(script.Parent.Signal)
+local Signal = loadstring(game:HttpGet("https://gist.githubusercontent.com/stravant/b75a322e0919d60dde8a0316d1f09d2f/raw/4961e32d9dd157d83bd7fdeae765650e107f302e/GoodSignal.lua"))()
 
 local function FlipTransparency(num)
 	return 1 - num
