@@ -58,6 +58,7 @@ EFrame.new = function(parent)
 		_rendered = false,
 		_absolutePosition = Vector2.new(0, 0),
 		_EGUITAG = true,
+		_mouseOver = false,
 		_destroyed = false
 	}
 
@@ -145,6 +146,9 @@ EFrame.new = function(parent)
 		EFrame._rendered = canRender and EFrame.Visible or false
 		EFrame._elements.background.Visible = EFrame._rendered
 		EFrame._elements.border.Visible = EFrame._rendered
+		if EFrame._rendered == false then
+			EFrame._mouseOver = false
+		end
 		for index, child in next, EFrame._children do
 			child:_renderUpdate()
 		end
@@ -169,6 +173,9 @@ EFrame.new = function(parent)
 
 		tab._destroyed = true
 	end
+	
+	EFrame._events.MouseEnter = Signal.new()
+	EFrame._events.MouseLeave = Signal.new()
 	
 	local background = Drawing.new("Square")
 	background.Position = Vector2.new(0, 0)
@@ -221,7 +228,6 @@ EFrame.new = function(parent)
 					if tab.Parent._children[index] == tab then
 						table.remove(tab.Parent._children, index)
 					end
-					
 				end
 			elseif tab._properties[index] then
 				tab._properties[index].Value = value
