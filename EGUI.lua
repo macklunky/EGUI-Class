@@ -38,6 +38,15 @@ EGUI.new = function()
 			error("Unable to cast " .. typeof(name) .. " to string", 2)
 		end
 		name = tostring(name)
+		
+		if EGUI._destroyed == false then
+			for index = 1, #EGUI._children do
+				local child = EGUI._children[index]
+				if child.Name == name then
+					return child
+				end
+			end
+		end
 
 		--if rawget(EGUI, "_destroyed") == false and EGUI._children[name] then
 			--return EGUI._children[name]
