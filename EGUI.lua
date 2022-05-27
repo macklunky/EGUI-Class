@@ -55,7 +55,7 @@ EGUI.new = function()
 		if not tab then
 			error("Expected ':' not '.' calling member function GetChildren", 2)
 		end
-		if EGUI._destroyed == false then--rawget(EGUI, "_destroyed") == false then
+		if EGUI._destroyed == false then
 			local children = {}
 			for index, child in next, EGUI._children do
 				children[index] = child
@@ -112,7 +112,7 @@ EGUI.new = function()
 
 	task.spawn(function()
 		local lastMousePosition = InputService:GetMouseLocation()
-		while EGUI._destroyed == false do--rawget(EGUI, "_destroyed") == false do
+		while EGUI._destroyed == false do
 			--update gui mouseenter mouseleave mousemove events
 			for index, child in next, EGUI._children do
 				if child._destroyed == false then
@@ -143,6 +143,7 @@ EGUI.new = function()
 	local beganConnection
 	beganConnection = InputService.InputBegan:Connect(function(input)
 		if input.UserInputType == Enum.UserInputType.MouseButton1 then
+			print"down"
 			--update mouse1down events with input.Position
 		elseif input.UserInputType == Enum.UserInputType.MouseButton2 then
 			--update mouse2down events with input.Position
@@ -154,6 +155,7 @@ EGUI.new = function()
 	local endedConnection
 	endedConnection = InputService.InputEnded:Connect(function(input)
 		if input.UserInputType == Enum.UserInputType.MouseButton1 then
+			print"up"
 			--update mouse1up events with input.Position
 		elseif input.UserInputType == Enum.UserInputType.MouseButton2 then
 			--update mouse2up events with input.Position
