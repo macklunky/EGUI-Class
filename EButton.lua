@@ -8,10 +8,10 @@ local function FlipTransparency(num)
 end
 
 
-local EFrame = {}
+local EButton = {}
 
-EFrame.new = function(parent)
-	local EFrame = {
+EButton.new = function(parent)
+	local EButton = {
 		_properties = {
 			Visible = {
 				Value = true
@@ -62,7 +62,7 @@ EFrame.new = function(parent)
 		_destroyed = false
 	}
 
-	EFrame.FindFirstChild = function(tab, name)
+	EButton.FindFirstChild = function(tab, name)
 		if not tab then
 			error("Expected ':' not '.' calling member function FindFirstChild", 2)
 		end
@@ -74,9 +74,9 @@ EFrame.new = function(parent)
 		end
 		name = tostring(name)
 		
-		if EFrame._destroyed == false then
-			for index = 1, #EFrame._children do
-				local child = EFrame._children[index]
+		if EButton._destroyed == false then
+			for index = 1, #EButton._children do
+				local child = EButton._children[index]
 				if child.Name == name then
 					return child
 				end
@@ -86,20 +86,20 @@ EFrame.new = function(parent)
 		return nil
 	end
 
-	EFrame.GetChildren = function(tab)
+	EButton.GetChildren = function(tab)
 		if not tab then
 			error("Expected ':' not '.' calling member function GetChildren", 2)
 		end
-		if EFrame._destroyed == false then
+		if EButton._destroyed == false then
 			local children = {}
-			for index, child in next, EFrame._children do
+			for index, child in next, EButton._children do
 				children[index] = child
 			end
 			return children
 		end
 	end
 
-	EFrame.Destroy = function(tab)
+	EButton.Destroy = function(tab)
 		if not tab then
 			error("Expected ':' not '.' calling member function Destroy", 2)
 		end
@@ -117,44 +117,44 @@ EFrame.new = function(parent)
 		tab:_destroy()
 	end
 	
-	EFrame._renderUpdate = function()
-		if EFrame.Parent.ClassName == "EGUI" then
-			EFrame._absolutePosition = EFrame.Position
+	EButton._renderUpdate = function()
+		if EButton.Parent.ClassName == "EGUI" then
+			EButton._absolutePosition = EButton.Position
 		else
-			EFrame._absolutePosition = EFrame.Parent._absolutePosition + EFrame.Position
+			EButton._absolutePosition = EButton.Parent._absolutePosition + EButton.Position
 		end
 		
-		EFrame._elements.background.Size = EFrame.Size
-		EFrame._elements.background.Position = EFrame._absolutePosition
-		EFrame._elements.background.Color = EFrame.BackgroundColor
-		EFrame._elements.background.Transparency = FlipTransparency(EFrame.BackgroundTransparency)
-		EFrame._elements.background.ZIndex = EFrame.ZIndex
+		EButton._elements.background.Size = EButton.Size
+		EButton._elements.background.Position = EButton._absolutePosition
+		EButton._elements.background.Color = EButton.BackgroundColor
+		EButton._elements.background.Transparency = FlipTransparency(EButton.BackgroundTransparency)
+		EButton._elements.background.ZIndex = EButton.ZIndex
 		
-		EFrame._elements.border.Size = EFrame.Size + Vector2.new(EFrame.BorderSize, EFrame.BorderSize)
-		EFrame._elements.border.Position = EFrame._absolutePosition - (Vector2.new(EFrame.BorderSize, EFrame.BorderSize) / 2)
-		EFrame._elements.border.Color = EFrame.BorderColor
-		EFrame._elements.border.Transparency = FlipTransparency(EFrame.BorderTransparency)
-		EFrame._elements.border.Thickness = EFrame.BorderSize
-		EFrame._elements.border.ZIndex = EFrame.ZIndex
+		EButton._elements.border.Size = EButton.Size + Vector2.new(EButton.BorderSize, EButton.BorderSize)
+		EButton._elements.border.Position = EButton._absolutePosition - (Vector2.new(EButton.BorderSize, EButton.BorderSize) / 2)
+		EButton._elements.border.Color = EButton.BorderColor
+		EButton._elements.border.Transparency = FlipTransparency(EButton.BorderTransparency)
+		EButton._elements.border.Thickness = EButton.BorderSize
+		EButton._elements.border.ZIndex = EButton.ZIndex
 		
 		local canRender = false
-		if EFrame.Parent.ClassName == "EGUI" then
-			canRender = EFrame.Parent.Enabled
+		if EButton.Parent.ClassName == "EGUI" then
+			canRender = EButton.Parent.Enabled
 		else
-			canRender = EFrame.Parent._rendered
+			canRender = EButton.Parent._rendered
 		end
-		EFrame._rendered = canRender and EFrame.Visible or false
-		EFrame._elements.background.Visible = EFrame._rendered
-		EFrame._elements.border.Visible = EFrame._rendered
-		if EFrame._rendered == false then
-			EFrame._mouseOver = false
+		EButton._rendered = canRender and EButton.Visible or false
+		EButton._elements.background.Visible = EButton._rendered
+		EButton._elements.border.Visible = EButton._rendered
+		if EButton._rendered == false then
+			EButton._mouseOver = false
 		end
-		for index, child in next, EFrame._children do
+		for index, child in next, EButton._children do
 			child:_renderUpdate()
 		end
 	end
 	
-	EFrame._destroy = function(tab)
+	EButton._destroy = function(tab)
 		for event, signal in next, tab._events do
 			signal:DisconnectAll()
 		end
@@ -174,43 +174,43 @@ EFrame.new = function(parent)
 		tab._destroyed = true
 	end
 	
-	EFrame._events.MouseEnter = Signal.new()
-	EFrame._events.MouseLeave = Signal.new()
-	EFrame._events.Mouse1Down = Signal.new()
-	EFrame._events.Mouse1Up = Signal.new()
-	EFrame._events.Mouse2Down = Signal.new()
-	EFrame._events.Mouse2Up = Signal.new()
-	EFrame._events.Mouse3Down = Signal.new()
-	EFrame._events.Mouse3Up = Signal.new()
-	EFrame._events.MouseWheelForward = Signal.new()
-	EFrame._events.MouseWheelBackward = Signal.new()
+	EButton._events.MouseEnter = Signal.new()
+	EButton._events.MouseLeave = Signal.new()
+	EButton._events.Mouse1Down = Signal.new()
+	EButton._events.Mouse1Up = Signal.new()
+	EButton._events.Mouse2Down = Signal.new()
+	EButton._events.Mouse2Up = Signal.new()
+	EButton._events.Mouse3Down = Signal.new()
+	EButton._events.Mouse3Up = Signal.new()
+	EButton._events.MouseWheelForward = Signal.new()
+	EButton._events.MouseWheelBackward = Signal.new()
 	
 	local background = Drawing.new("Square")
 	background.Position = Vector2.new(0, 0)
 	background.Size = Vector2.new(200, 50)
 	background.Filled = true
-	background.Transparency = FlipTransparency(EFrame._properties.BackgroundTransparency.Value)
+	background.Transparency = FlipTransparency(EButton._properties.BackgroundTransparency.Value)
 	background.Thickness = 0
 	background.Color = Color3.fromRGB(255, 255, 255)
 	background.ZIndex = 1
 	background.Visible = false
-	EFrame._elements.background = background
+	EButton._elements.background = background
 
 	local border = Drawing.new("Square")
 	border.Position = Vector2.new(-0.5, -0.5)
 	border.Size = Vector2.new(201, 51)
 	border.Filled = false
-	border.Transparency = FlipTransparency(EFrame._properties.BorderTransparency.Value)
+	border.Transparency = FlipTransparency(EButton._properties.BorderTransparency.Value)
 	border.Thickness = 1
 	border.Color = Color3.fromRGB(0, 0, 0)
 	border.ZIndex = 1
 	border.Visible = false
-	EFrame._elements.border = border
+	EButton._elements.border = border
 	
-	setmetatable(EFrame, {
+	setmetatable(EButton, {
 		__index = function(tab, index)
 			if typeof(index) ~= "string" and typeof(index) ~= "number" then
-				error(index .. " is not a valid member of EFrame", 2)
+				error(index .. " is not a valid member of EButton", 2)
 			end
 			if tab._events[index] ~= nil then
 				return tab._events[index]
@@ -244,10 +244,10 @@ EFrame.new = function(parent)
 	})
 	
 	if parent then
-		EFrame.Parent = parent
+		EButton.Parent = parent
 	end
 	
-	return EFrame
+	return EButton
 end
 
-return EFrame
+return EButton
