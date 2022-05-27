@@ -47,10 +47,6 @@ EGUI.new = function()
 				end
 			end
 		end
-
-		--if rawget(EGUI, "_destroyed") == false and EGUI._children[name] then
-			--return EGUI._children[name]
-		--end
 		
 		return nil
 	end
@@ -59,7 +55,7 @@ EGUI.new = function()
 		if not tab then
 			error("Expected ':' not '.' calling member function GetChildren", 2)
 		end
-		if rawget(EGUI, "_destroyed") == false then
+		if EGUI._destroyed == false then--rawget(EGUI, "_destroyed") == false then
 			local children = {}
 			for index, child in next, EGUI._children do
 				children[index] = child
@@ -116,7 +112,7 @@ EGUI.new = function()
 
 	task.spawn(function()
 		local lastMousePosition = InputService:GetMouseLocation()
-		while rawget(EGUI, "_destroyed") == false do
+		while EGUI._destroyed == false do--rawget(EGUI, "_destroyed") == false do
 			--update gui mouseenter mouseleave mousemove events
 			for index, child in next, EGUI._children do
 				if child._destroyed == false then
