@@ -182,6 +182,8 @@ EFrame.new = function(parent)
 	EFrame._events.Mouse2Up = Signal.new()
 	EFrame._events.Mouse3Down = Signal.new()
 	EFrame._events.Mouse3Up = Signal.new()
+	EFrame._events.MouseWheelForward = Signal.new()
+	EFrame._events.MouseWheelBackward = Signal.new()
 	
 	local background = Drawing.new("Square")
 	background.Position = Vector2.new(0, 0)
