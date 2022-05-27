@@ -166,7 +166,7 @@ EGUI.new = function()
 		end
 		
 		for index, child in next, object._children do
-			if child._destroyed == false and child._rendered == true and child.ClassName == "Frame" then
+			if child._destroyed == false and child._rendered == true and child.ClassName == "EButton" then
 				Mouse1DownCheck(child, pos)
 			end
 		end
@@ -183,7 +183,7 @@ EGUI.new = function()
 		end
 
 		for index, child in next, object._children do
-			if child._destroyed == false and child._rendered == true and child.ClassName == "Frame" then
+			if child._destroyed == false and child._rendered == true and child.ClassName == "EButton" then
 				Mouse2DownCheck(child, pos)
 			end
 		end
@@ -200,7 +200,7 @@ EGUI.new = function()
 		end
 
 		for index, child in next, object._children do
-			if child._destroyed == false and child._rendered == true and child.ClassName == "Frame" then
+			if child._destroyed == false and child._rendered == true and child.ClassName == "EButton" then
 				Mouse3DownCheck(child, pos)
 			end
 		end
@@ -217,7 +217,7 @@ EGUI.new = function()
 		end
 
 		for index, child in next, object._children do
-			if child._destroyed == false and child._rendered == true and child.ClassName == "Frame" then
+			if child._destroyed == false and child._rendered == true and child.ClassName == "EButton" then
 				Mouse1UpCheck(child, pos)
 			end
 		end
@@ -234,7 +234,7 @@ EGUI.new = function()
 		end
 
 		for index, child in next, object._children do
-			if child._destroyed == false and child._rendered == true and child.ClassName == "Frame" then
+			if child._destroyed == false and child._rendered == true and child.ClassName == "EButton" then
 				Mouse2UpCheck(child, pos)
 			end
 		end
@@ -251,7 +251,7 @@ EGUI.new = function()
 		end
 
 		for index, child in next, object._children do
-			if child._destroyed == false and child._rendered == true and child.ClassName == "Frame" then
+			if child._destroyed == false and child._rendered == true and child.ClassName == "EButton" then
 				Mouse3UpCheck(child, pos)
 			end
 		end
@@ -300,7 +300,11 @@ EGUI.new = function()
 				end
 			end
 		elseif input.UserInputType == Enum.UserInputType.MouseWheel and input.Position.Z == -1 then
-			
+			for index, child in next, EGUI._children do
+				if child._destroyed == false and child._rendered == true then
+					MouseWheelBackwardCheck(child, input.Position)
+				end
+			end
 		end
 	end)
 
@@ -308,19 +312,19 @@ EGUI.new = function()
 	beganConnection = InputService.InputBegan:Connect(function(input)
 		if input.UserInputType == Enum.UserInputType.MouseButton1 then
 			for index, child in next, EGUI._children do
-				if child._destroyed == false and child._rendered == true and child.ClassName == "EFrame" then
+				if child._destroyed == false and child._rendered == true and child.ClassName == "EButton" then
 					Mouse1DownCheck(child, input.Position)
 				end
 			end
 		elseif input.UserInputType == Enum.UserInputType.MouseButton2 then
 			for index, child in next, EGUI._children do
-				if child._destroyed == false and child._rendered == true and child.ClassName == "EFrame" then
+				if child._destroyed == false and child._rendered == true and child.ClassName == "EButton" then
 					Mouse2DownCheck(child, input.Position)
 				end
 			end
 		elseif input.UserInputType == Enum.UserInputType.MouseButton3 then
 			for index, child in next, EGUI._children do
-				if child._destroyed == false and child._rendered == true and child.ClassName == "EFrame" then
+				if child._destroyed == false and child._rendered == true and child.ClassName == "EButton" then
 					Mouse3DownCheck(child, input.Position)
 				end
 			end
@@ -331,19 +335,19 @@ EGUI.new = function()
 	endedConnection = InputService.InputEnded:Connect(function(input)
 		if input.UserInputType == Enum.UserInputType.MouseButton1 then
 			for index, child in next, EGUI._children do
-				if child._destroyed == false and child._rendered == true and child.ClassName == "EFrame" then
+				if child._destroyed == false and child._rendered == true and child.ClassName == "EButton" then
 					Mouse1UpCheck(child, input.Position)
 				end
 			end
 		elseif input.UserInputType == Enum.UserInputType.MouseButton2 then
 			for index, child in next, EGUI._children do
-				if child._destroyed == false and child._rendered == true and child.ClassName == "EFrame" then
+				if child._destroyed == false and child._rendered == true and child.ClassName == "EButton" then
 					Mouse2UpCheck(child, input.Position)
 				end
 			end
 		elseif input.UserInputType == Enum.UserInputType.MouseButton3 then
 			for index, child in next, EGUI._children do
-				if child._destroyed == false and child._rendered == true and child.ClassName == "EFrame" then
+				if child._destroyed == false and child._rendered == true and child.ClassName == "EButton" then
 					Mouse3UpCheck(child, input.Position)
 				end
 			end
