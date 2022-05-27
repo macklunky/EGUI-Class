@@ -123,12 +123,14 @@ EGUI.new = function()
 				mouseOver = true
 			end
 			
-			if mouseOver == false and object._mouseOver == true then
-				object._events.MouseLeave:Fire(newPos.X, newPos.Y)
-				object._mouseOver = false
-			elseif mouseOver == true and object._mouseOver == false then
-				object._events.MouseEnter:Fire(newPos.X, newPos.Y)
-				object._mouseOver = true
+			if mouseOver ~= object._mouseOver then
+				if mouseOver == false and object._mouseOver == true then
+					object._events.MouseLeave:Fire(newPos.X, newPos.Y)
+					object._mouseOver = false
+				elseif mouseOver == true and object._mouseOver == false then
+					object._events.MouseEnter:Fire(newPos.X, newPos.Y)
+					object._mouseOver = true
+				end
 			end
 			
 			for index, child in next, object._children do
