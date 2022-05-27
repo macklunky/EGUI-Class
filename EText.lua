@@ -177,17 +177,6 @@ EText.new = function(parent)
 		tab._destroyed = true
 	end
 	
-	EText._events.MouseEnter = Signal.new()
-	EText._events.MouseLeave = Signal.new()
-	EText._events.Mouse1Down = Signal.new()
-	EText._events.Mouse1Up = Signal.new()
-	EText._events.Mouse2Down = Signal.new()
-	EText._events.Mouse2Up = Signal.new()
-	EText._events.Mouse3Down = Signal.new()
-	EText._events.Mouse3Up = Signal.new()
-	EText._events.MouseWheelForward = Signal.new()
-	EText._events.MouseWheelBackward = Signal.new()
-	
 	local text = Drawing.new("Text")
 	text.Position = Vector2.new(0, 0)
 	text.Size = 14
