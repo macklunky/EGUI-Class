@@ -203,9 +203,8 @@ EGUI.new = function()
 	local beganConnection
 	beganConnection = InputService.InputBegan:Connect(function(input)
 		if input.UserInputType == Enum.UserInputType.MouseButton1 then
-			--print"down"
 			for index, child in next, EGUI._children do
-				if child._destroyed == false and child._rendered == true and child.ClassName == "Frame" then
+				if child._destroyed == false and child._rendered == true and child.ClassName == "EFrame" then
 					Mouse1DownCheck(child, input.Position)
 				end
 			end
@@ -220,10 +219,8 @@ EGUI.new = function()
 	local endedConnection
 	endedConnection = InputService.InputEnded:Connect(function(input)
 		if input.UserInputType == Enum.UserInputType.MouseButton1 then
-			--print"up"
 			for index, child in next, EGUI._children do
-				if child._destroyed == false and child._rendered == true and child.ClassName == "Frame" then
-					print(input.Position)
+				if child._destroyed == false and child._rendered == true and child.ClassName == "EFrame" then
 					Mouse1UpCheck(child, input.Position)
 				end
 			end
