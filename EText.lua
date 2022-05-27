@@ -130,7 +130,7 @@ EText.new = function(parent)
 			EText._absolutePosition = EText.Parent._absolutePosition + EText.Position
 		end
 		
-		EText._elements.text.Size = EText.TextSize
+		--EText._elements.text.Size = EText.TextSize
 		EText._elements.text.Outline = EText.Outline
 		EText._elements.text.Center = EText.Center
 		EText._elements.text.Text = EText.Text
@@ -220,6 +220,8 @@ EText.new = function(parent)
 						table.remove(tab.Parent._children, index)
 					end
 				end
+			elseif index == "TextSize" and tab._destroyed == false  then
+				tab._elements.text.Size = value
 			elseif tab._properties[index] then
 				tab._properties[index].Value = value
 			end
