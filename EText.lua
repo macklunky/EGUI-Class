@@ -38,7 +38,7 @@ EText.new = function(parent)
 				Value = Color3.fromRGB(255, 255, 255)
 			},
 			Center = {
-				Value = false
+				Value = true
 			},
 			Position = {
 				Value = Vector2.new(0, 0)
@@ -184,6 +184,7 @@ EText.new = function(parent)
 	text.Color = Color3.fromRGB(255, 255, 255)
 	text.ZIndex = 1
 	text.Visible = false
+	text.Center = true
 	text.Font = Drawing.Fonts.UI
 	EText._elements.text = text
 	
