@@ -112,6 +112,30 @@ EGUI.new = function()
 
 	task.spawn(function()
 		local lastMousePosition = InputService:GetMouseLocation()
+		
+		local function MouseProximityCheck(object, lastPos, newPos)
+			if object._rendered == false then
+				return
+			end
+			
+			local mouseOver = false
+			if (newPos.X >= object._absolutePosition.X and newPos.X <= (object._absolutePosition.X + object.Size.X)) and (newPos.Y >= object._absolutePosition.Y and newPos.Y <= (object._absolutePosition.Y + object.Size.Y)) then
+				mouseOver = true
+			end
+			
+			if mouseOver == false and object._mouseOver == true then
+				object._events.MouseLeave:Fire(newPos.X, newPos.Y)
+			elseif mouseOver == true and object._mouseOver == false then
+				object._events.MouseEnter:Fire(newPos.X, newPos.Y)
+			end
+			
+			for index, child in next, object._children do
+				if child._destroyed == false then
+					MouseProximityCheck(child, lastPos, newPos)
+				end
+			end
+		end
+		
 		while EGUI._destroyed == false do
 			--update gui mouseenter mouseleave mousemove events
 			for index, child in next, EGUI._children do
@@ -121,7 +145,11 @@ EGUI.new = function()
 			end
 			local newMousePosition = InputService:GetMouseLocation()
 			if newMousePosition ~= lastMousePosition then
-				
+				for index, child in next, EGUI._children do
+					if child._destroyed == false then
+						MouseProximityCheck(child, lastMousePosition, newMousePosition)
+					end
+				end
 				
 				--do stuff
 				--update gui rendering
