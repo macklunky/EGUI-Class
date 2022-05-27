@@ -114,10 +114,6 @@ EGUI.new = function()
 		local lastMousePosition = InputService:GetMouseLocation()
 		
 		local function MouseProximityCheck(object, lastPos, newPos)
-			if object._rendered == false then
-				return
-			end
-			
 			local mouseOver = false
 			if (newPos.X >= object._absolutePosition.X and newPos.X <= (object._absolutePosition.X + object.Size.X)) and (newPos.Y >= object._absolutePosition.Y and newPos.Y <= (object._absolutePosition.Y + object.Size.Y)) then
 				mouseOver = true
@@ -132,7 +128,7 @@ EGUI.new = function()
 			end
 			
 			for index, child in next, object._children do
-				if child._destroyed == false then
+				if child._destroyed == false and child._rendered == true then
 					MouseProximityCheck(child, lastPos, newPos)
 				end
 			end
@@ -148,7 +144,7 @@ EGUI.new = function()
 			local newMousePosition = InputService:GetMouseLocation()
 			if newMousePosition ~= lastMousePosition then
 				for index, child in next, EGUI._children do
-					if child._destroyed == false then
+					if child._destroyed == false and child._rendered == true then
 						MouseProximityCheck(child, lastMousePosition, newMousePosition)
 					end
 				end
@@ -162,7 +158,41 @@ EGUI.new = function()
 			RunService.RenderStepped:Wait()
 		end
 	end)
+	
+	local function Mouse1DownCheck(object, pos)
+		local mouseOver = false
+		if (pos.X >= object._absolutePosition.X and pos.X <= (object._absolutePosition.X + object.Size.X)) and (pos.Y >= object._absolutePosition.Y and pos.Y <= (object._absolutePosition.Y + object.Size.Y)) then
+			mouseOver = true
+		end
+		
+		if mouseOver then
+			object._events.Mouse1Down:Fire()
+		end
+		
+		for index, child in next, object._children do
+			if child._destroyed == false and child._rendered == true and child.ClassName == "Frame" then
+				Mouse1DownCheck(child, pos)
+			end
+		end
+	end
+	
+	local function Mouse1UpCheck(object, pos)
+		local mouseOver = false
+		if (pos.X >= object._absolutePosition.X and pos.X <= (object._absolutePosition.X + object.Size.X)) and (pos.Y >= object._absolutePosition.Y and pos.Y <= (object._absolutePosition.Y + object.Size.Y)) then
+			mouseOver = true
+		end
 
+		if mouseOver then
+			object._events.Mouse1Up:Fire()
+		end
+
+		for index, child in next, object._children do
+			if child._destroyed == false and child._rendered == true and child.ClassName == "Frame" then
+				Mouse1UpCheck(child, pos)
+			end
+		end
+	end
+	
 	local changedConnection
 	changedConnection = InputService.InputChanged:Connect(function(input)
 		if input.UserInputType == Enum.UserInputType.MouseWheel then
@@ -173,7 +203,12 @@ EGUI.new = function()
 	local beganConnection
 	beganConnection = InputService.InputBegan:Connect(function(input)
 		if input.UserInputType == Enum.UserInputType.MouseButton1 then
-			print"down"
+			--print"down"
+			for index, child in next, EGUI._children do
+				if child._destroyed == false and child._rendered == true and child.ClassName == "Frame" then
+					Mouse1DownCheck(child, input.Position)
+				end
+			end
 			--update mouse1down events with input.Position
 		elseif input.UserInputType == Enum.UserInputType.MouseButton2 then
 			--update mouse2down events with input.Position
@@ -185,7 +220,12 @@ EGUI.new = function()
 	local endedConnection
 	endedConnection = InputService.InputEnded:Connect(function(input)
 		if input.UserInputType == Enum.UserInputType.MouseButton1 then
-			print"up"
+			--print"up"
+			for index, child in next, EGUI._children do
+				if child._destroyed == false and child._rendered == true and child.ClassName == "Frame" then
+					Mouse1UpCheck(child, input.Position)
+				end
+			end
 			--update mouse1up events with input.Position
 		elseif input.UserInputType == Enum.UserInputType.MouseButton2 then
 			--update mouse2up events with input.Position
