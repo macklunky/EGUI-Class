@@ -257,29 +257,48 @@ EGUI.new = function()
 		end
 	end
 	
-	--[[local function MouseWheelForwardCheck(object, input)
+	local function MouseWheelForwardCheck(object, pos)
 		local mouseOver = false
 		if (pos.X >= object._absolutePosition.X and pos.X <= (object._absolutePosition.X + object.Size.X)) and (pos.Y >= object._absolutePosition.Y and pos.Y <= (object._absolutePosition.Y + object.Size.Y)) then
 			mouseOver = true
 		end
-	end]]
+		
+		if mouseOver then
+			object._events.MouseWheelForward:Fire(pos.X, pos.Y)
+		end
+		
+		for index, child in next, object._children do
+			if child._destroyed == false and child._rendered == true then
+				MouseWheelForwardCheck(child, pos)
+			end
+		end
+	end
 	
-	--[[local function MouseWheelBackwardCheck(object, input)
+	local function MouseWheelBackwardCheck(object, pos)
 		local mouseOver = false
 		if (pos.X >= object._absolutePosition.X and pos.X <= (object._absolutePosition.X + object.Size.X)) and (pos.Y >= object._absolutePosition.Y and pos.Y <= (object._absolutePosition.Y + object.Size.Y)) then
 			mouseOver = true
 		end
-	end]]
+		
+		if mouseOver then
+			object._events.MouseWheelBackward:Fire(pos.X, pos.Y)
+		end
+		
+		for index, child in next, object._children do
+			if child._destroyed == false and child._rendered == true then
+				MouseWheelBackwardCheck(child, pos)
+			end
+		end
+	end
 	
 	local changedConnection
 	changedConnection = InputService.InputChanged:Connect(function(input)
 		if input.UserInputType == Enum.UserInputType.MouseWheel and input.Position.Z == 1 then
-			print(input.Position)
-			--[[for index, child in next, EGUI._children do
+			for index, child in next, EGUI._children do
 				if child._destroyed == false and child._rendered == true then
-					MouseWheelForwardCheck(child, input.Position.Z)
+					MouseWheelForwardCheck(child, input.Position)
 				end
-			end]]
+			end
 		elseif input.UserInputType == Enum.UserInputType.MouseWheel and input.Position.Z == -1 then
 			
 		end
