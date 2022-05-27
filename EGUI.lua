@@ -166,7 +166,7 @@ EGUI.new = function()
 		end
 		
 		if mouseOver then
-			object._events.Mouse1Down:Fire()
+			object._events.Mouse1Down:Fire(pos.X, pos.Y)
 		end
 		
 		for index, child in next, object._children do
@@ -183,7 +183,7 @@ EGUI.new = function()
 		end
 
 		if mouseOver then
-			object._events.Mouse1Up:Fire()
+			object._events.Mouse1Up:Fire(pos.X, pos.Y)
 		end
 
 		for index, child in next, object._children do
@@ -223,6 +223,7 @@ EGUI.new = function()
 			--print"up"
 			for index, child in next, EGUI._children do
 				if child._destroyed == false and child._rendered == true and child.ClassName == "Frame" then
+					print(input.Position)
 					Mouse1UpCheck(child, input.Position)
 				end
 			end
