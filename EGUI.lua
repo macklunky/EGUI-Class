@@ -135,7 +135,6 @@ EGUI.new = function()
 		end
 		
 		while EGUI._destroyed == false do
-			--update gui mouseenter mouseleave mousemove events
 			for index, child in next, EGUI._children do
 				if child._destroyed == false then
 					child:_renderUpdate()
@@ -148,9 +147,6 @@ EGUI.new = function()
 						MouseProximityCheck(child, lastMousePosition, newMousePosition)
 					end
 				end
-				
-				--do stuff
-				--update gui rendering
 				
 				
 				lastMousePosition = newMousePosition
@@ -261,10 +257,31 @@ EGUI.new = function()
 		end
 	end
 	
+	--[[local function MouseWheelForwardCheck(object, input)
+		local mouseOver = false
+		if (pos.X >= object._absolutePosition.X and pos.X <= (object._absolutePosition.X + object.Size.X)) and (pos.Y >= object._absolutePosition.Y and pos.Y <= (object._absolutePosition.Y + object.Size.Y)) then
+			mouseOver = true
+		end
+	end]]
+	
+	--[[local function MouseWheelBackwardCheck(object, input)
+		local mouseOver = false
+		if (pos.X >= object._absolutePosition.X and pos.X <= (object._absolutePosition.X + object.Size.X)) and (pos.Y >= object._absolutePosition.Y and pos.Y <= (object._absolutePosition.Y + object.Size.Y)) then
+			mouseOver = true
+		end
+	end]]
+	
 	local changedConnection
 	changedConnection = InputService.InputChanged:Connect(function(input)
-		if input.UserInputType == Enum.UserInputType.MouseWheel then
-			--update gui scroll events with input.Position
+		if input.UserInputType == Enum.UserInputType.MouseWheel and input.Position.Z == 1 then
+			print(input.Position)
+			--[[for index, child in next, EGUI._children do
+				if child._destroyed == false and child._rendered == true then
+					MouseWheelForwardCheck(child, input.Position.Z)
+				end
+			end]]
+		elseif input.UserInputType == Enum.UserInputType.MouseWheel and input.Position.Z == -1 then
+			
 		end
 	end)
 
