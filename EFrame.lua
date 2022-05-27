@@ -148,7 +148,6 @@ EFrame.new = function(parent)
 		EFrame._elements.border.Visible = EFrame._rendered
 		if EFrame._rendered == false then
 			EFrame._mouseOver = false
-			print("rendering")
 		end
 		for index, child in next, EFrame._children do
 			child:_renderUpdate()
@@ -177,6 +176,8 @@ EFrame.new = function(parent)
 	
 	EFrame._events.MouseEnter = Signal.new()
 	EFrame._events.MouseLeave = Signal.new()
+	EFrame._events.Mouse1Down = Signal.new()
+	EFrame._events.Mouse1Up = Signal.new()
 	
 	local background = Drawing.new("Square")
 	background.Position = Vector2.new(0, 0)
