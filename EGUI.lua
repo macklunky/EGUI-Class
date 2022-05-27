@@ -176,6 +176,40 @@ EGUI.new = function()
 		end
 	end
 	
+	local function Mouse2DownCheck(object, pos)
+		local mouseOver = false
+		if (pos.X >= object._absolutePosition.X and pos.X <= (object._absolutePosition.X + object.Size.X)) and (pos.Y >= object._absolutePosition.Y and pos.Y <= (object._absolutePosition.Y + object.Size.Y)) then
+			mouseOver = true
+		end
+
+		if mouseOver then
+			object._events.Mouse2Down:Fire(pos.X, pos.Y)
+		end
+
+		for index, child in next, object._children do
+			if child._destroyed == false and child._rendered == true and child.ClassName == "Frame" then
+				Mouse2DownCheck(child, pos)
+			end
+		end
+	end
+	
+	local function Mouse3DownCheck(object, pos)
+		local mouseOver = false
+		if (pos.X >= object._absolutePosition.X and pos.X <= (object._absolutePosition.X + object.Size.X)) and (pos.Y >= object._absolutePosition.Y and pos.Y <= (object._absolutePosition.Y + object.Size.Y)) then
+			mouseOver = true
+		end
+
+		if mouseOver then
+			object._events.Mouse3Down:Fire(pos.X, pos.Y)
+		end
+
+		for index, child in next, object._children do
+			if child._destroyed == false and child._rendered == true and child.ClassName == "Frame" then
+				Mouse3DownCheck(child, pos)
+			end
+		end
+	end
+	
 	local function Mouse1UpCheck(object, pos)
 		local mouseOver = false
 		if (pos.X >= object._absolutePosition.X and pos.X <= (object._absolutePosition.X + object.Size.X)) and (pos.Y >= object._absolutePosition.Y and pos.Y <= (object._absolutePosition.Y + object.Size.Y)) then
@@ -189,6 +223,40 @@ EGUI.new = function()
 		for index, child in next, object._children do
 			if child._destroyed == false and child._rendered == true and child.ClassName == "Frame" then
 				Mouse1UpCheck(child, pos)
+			end
+		end
+	end
+	
+	local function Mouse2UpCheck(object, pos)
+		local mouseOver = false
+		if (pos.X >= object._absolutePosition.X and pos.X <= (object._absolutePosition.X + object.Size.X)) and (pos.Y >= object._absolutePosition.Y and pos.Y <= (object._absolutePosition.Y + object.Size.Y)) then
+			mouseOver = true
+		end
+
+		if mouseOver then
+			object._events.Mouse2Up:Fire(pos.X, pos.Y)
+		end
+
+		for index, child in next, object._children do
+			if child._destroyed == false and child._rendered == true and child.ClassName == "Frame" then
+				Mouse2UpCheck(child, pos)
+			end
+		end
+	end
+	
+	local function Mouse3UpCheck(object, pos)
+		local mouseOver = false
+		if (pos.X >= object._absolutePosition.X and pos.X <= (object._absolutePosition.X + object.Size.X)) and (pos.Y >= object._absolutePosition.Y and pos.Y <= (object._absolutePosition.Y + object.Size.Y)) then
+			mouseOver = true
+		end
+
+		if mouseOver then
+			object._events.Mouse3Up:Fire(pos.X, pos.Y)
+		end
+
+		for index, child in next, object._children do
+			if child._destroyed == false and child._rendered == true and child.ClassName == "Frame" then
+				Mouse3UpCheck(child, pos)
 			end
 		end
 	end
@@ -208,11 +276,18 @@ EGUI.new = function()
 					Mouse1DownCheck(child, input.Position)
 				end
 			end
-			--update mouse1down events with input.Position
 		elseif input.UserInputType == Enum.UserInputType.MouseButton2 then
-			--update mouse2down events with input.Position
+			for index, child in next, EGUI._children do
+				if child._destroyed == false and child._rendered == true and child.ClassName == "EFrame" then
+					Mouse2DownCheck(child, input.Position)
+				end
+			end
 		elseif input.UserInputType == Enum.UserInputType.MouseButton3 then
-			--update mouse3down events with input.Position
+			for index, child in next, EGUI._children do
+				if child._destroyed == false and child._rendered == true and child.ClassName == "EFrame" then
+					Mouse3DownCheck(child, input.Position)
+				end
+			end
 		end
 	end)
 
@@ -224,11 +299,18 @@ EGUI.new = function()
 					Mouse1UpCheck(child, input.Position)
 				end
 			end
-			--update mouse1up events with input.Position
 		elseif input.UserInputType == Enum.UserInputType.MouseButton2 then
-			--update mouse2up events with input.Position
+			for index, child in next, EGUI._children do
+				if child._destroyed == false and child._rendered == true and child.ClassName == "EFrame" then
+					Mouse2UpCheck(child, input.Position)
+				end
+			end
 		elseif input.UserInputType == Enum.UserInputType.MouseButton3 then
-			--update mouse3up events with input.Position
+			for index, child in next, EGUI._children do
+				if child._destroyed == false and child._rendered == true and child.ClassName == "EFrame" then
+					Mouse3UpCheck(child, input.Position)
+				end
+			end
 		end
 	end)
 	
