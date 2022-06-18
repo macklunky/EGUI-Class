@@ -1,379 +1,565 @@
 local InputService = game:GetService("UserInputService")
-local RunService = game:GetService("RunService")
-
 local Signal = loadstring(game:HttpGet("https://gist.githubusercontent.com/stravant/b75a322e0919d60dde8a0316d1f09d2f/raw/4961e32d9dd157d83bd7fdeae765650e107f302e/GoodSignal.lua"))()
+
+local layers = {}
+local drawings = {}
 
 local function FlipTransparency(num)
 	return 1 - num
 end
 
+local function AddToLayer(drawing)
+	local layer = drawing.ZIndex
+	
+	if not layers[layer] then
+		layers[layer] = {}
+	end
+	
+	table.insert(layers[layer], drawing)
+end
+
+local function UpdateLayer(drawing, prevLayer)
+	for index = 1, #layers[prevLayer] do
+		local value = layers[prevLayer][index]
+		if value == drawing  then
+			table.remove(layers[prevLayer], index)
+			break
+		end
+	end
+	
+	if not layers[drawing.ZIndex] then
+		layers[drawing.ZIndex] = {}
+	end
+	
+	table.insert(layers[drawing.ZIndex], drawing)
+end
+
+local function RemoveFromLayer(drawing)
+	for index = 1, #layers[drawing.ZIndex] do
+		local value = layers[drawing.ZIndex][index]
+		if value == drawing then
+			table.remove(layers[drawing.ZIndex], index)
+			break
+		end
+	end
+end
+
+local function InBounds(pos, boundsPos, boundsSize)
+	local X = (pos.X >= boundsPos.X and pos.X <= (boundsPos.X + boundsSize.X))
+	local Y = (pos.Y >= boundsPos.Y and pos.Y <= (boundsPos.Y + boundsSize.Y))
+	return X and Y
+end
+
 local EGUI = {}
 
-EGUI.new = function()
-	local EGUI = {
+EGUI.CreateSquare = function(self, args)
+	if not self then
+		error("Expected ':' not '.' calling member function CreateSquare", 2)
+	end
+	
+	local drawing = Drawing.new("Square")
+	drawing.Size = typeof(args.Size) == "Vector2" and args.Size or Vector2.new(200, 50)
+	drawing.Filled = true
+	drawing.Thickness = 0
+	drawing.Transparency = FlipTransparency(typeof(args.Transparency) == "number" and args.Transparency or 0)
+	drawing.Color = typeof(args.Color) == "Color3" and args.Color or Color3.fromRGB(255, 255, 255)
+	drawing.Visible = typeof(args.Visible) == "boolean" and args.Visible or false
+	drawing.ZIndex = typeof(args.ZIndex) == "number" and args.ZIndex or 0
+	drawing.Position = (typeof(args.Position) == "Vector2" and args.Position or Vector2.new()) - (typeof(args.AnchorPoint) == "Vector2" and args.AnchorPoint or Vector2.new(0, 0)) * drawing.Size
+
+	local Square = {
 		_properties = {
-			Enabled = {
-				Value = true
-			},
-			ClassName = {
-				Value = "EGUI"
-			}
+			Color = drawing.Color,
+			Position = args.Position,
+			Size = drawing.Size,
+			ZIndex = drawing.ZIndex,
+			Visible = drawing.Visible,
+			CaptureInput = typeof(args.CaptureInput) == "boolean" and args.CaptureInput or false,
+			AnchorPoint = typeof(args.AnchorPoint) == "Vector2" and args.AnchorPoint or Vector2.new(0, 0)
 		},
-		_methods = {},
-		_events = {},
-		_connections = {},
-		_children = {},
-		_EGUITAG = true,
-		_destroyed = false
+		_internal = {
+			Drawing = drawing,
+			Type = "Square",
+			_destroyed = false
+		},
+		_events = {
+			MouseButton1Down = Signal.new(),
+			MouseButton1Up = Signal.new(),
+			MouseEnter = Signal.new(),
+			MouseMoved = Signal.new(),
+			MouseLeave = Signal.new(),
+			Changed = Signal.new()
+		}
 	}
 
-	EGUI.FindFirstChild = function(tab, name)
-		if not tab then
-			error("Expected ':' not '.' calling member function FindFirstChild", 2)
-		end
-		if not name then
-			error("Argument 1 missing or nil", 2)
-		end
-		if typeof(name) ~= "string" and typeof(name) ~= "number" then
-			error("Unable to cast " .. typeof(name) .. " to string", 2)
-		end
-		name = tostring(name)
-		
-		if EGUI._destroyed == false then
-			for index = 1, #EGUI._children do
-				local child = EGUI._children[index]
-				if child.Name == name then
-					return child
-				end
-			end
-		end
-		
-		return nil
-	end
-
-	EGUI.GetChildren = function(tab, name)
-		if not tab then
-			error("Expected ':' not '.' calling member function GetChildren", 2)
-		end
-		if EGUI._destroyed == false then
-			local children = {}
-			for index, child in next, EGUI._children do
-				children[index] = child
-			end
-			return children
-		end
-	end
-
-	EGUI.Destroy = function(tab)
-		if not tab then
+	Square.Destroy = function(self)
+		if not self then
 			error("Expected ':' not '.' calling member function Destroy", 2)
 		end
+
+		if self._internal._destroyed then return nil end
 		
-		for event, signal in next, tab._events do
-			signal:DisconnectAll()
+		RemoveFromLayer(self)
+		for index = 1, #drawings do
+			local drawing = drawings[index]
+			if drawing == self then
+				table.remove(drawings, index)
+				break
+			end
 		end
 		
-		for index, child in next, tab._children do
-			child:_destroy()
+		for index, event in next, self._events do
+			event:DisconnectAll()
 		end
-
-		tab._children = {}
-
-		tab._destroyed = true
+		self._events = {}
+		
+		self._internal.Drawing:Remove()
+		self._internal.Drawing = nil
 	end
 
-	setmetatable(EGUI, {
-		__index = function(tab, index)
-			if typeof(index) ~= "string" and typeof(index) ~= "number" then
-				error(index .. " is not a valid member of EFrame", 2)
-			end
-			if tab._events[index] ~= nil then
-				return tab._events[index]
-			elseif tab._properties[index] ~= nil then
-				return tab._properties[index].Value
-			elseif tab._methods[index] ~= nil then
-				return tab._methods[index]
-			elseif tab:FindFirstChild(index) then
-				return tab:FindFirstChild(index)
+	setmetatable(Square, {
+		__index = function(self, index)
+			if self._properties[index] ~= nil then
+				return self._properties[index]
+			elseif self._events[index] ~= nil and not self._internal._destroyed then
+				return self._events[index]
+			else
+				error(index .. " is not a valid member of Square", 2)
 			end
 		end,
 
-		__newindex = function(tab, index, value)
-			if typeof(index) ~= "string" and typeof(index) ~= "number" then
-				error(index .. " is not a valid member of EFrame", 2)
-			end
-			if tab._properties[index] then
-				tab._properties[index].Value = value
+		__newindex = function(self, index, value)
+			if self._internal._destroyed then return nil end
+
+			if index == "Position" then
+				if typeof(value) ~= "Vector2" then
+					error("Unable to assign property " .. index .. ". Vector2 expected, got "  .. typeof(value), 2)
+				end
+				self._internal.Drawing.Position = value - (self.Size * self.AnchorPoint)
+				local prev = self[index]
+				self._properties.Position = value
+				self.Changed:Fire(index, prev)
+			elseif index == "Size" then
+				if typeof(value) ~= "Vector2" then
+					error("Unable to assign property " .. index .. ". Vector2 expected, got "  .. typeof(value), 2)
+				end
+				self._internal.Drawing.Size = value
+				self._internal.Drawing.Position = self.Position - (value * self.AnchorPoint)
+				local prev = self[index]
+				self._properties.Size = value
+				self.Changed:Fire(index, prev)
+			elseif index == "ZIndex" then
+				if typeof(value) ~= "number" then
+					error("Unable to assign property " .. index .. ". number expected, got "  .. typeof(value), 2)
+				end
+				self._internal.Drawing.ZIndex = value
+				local prev = self[index]
+				self._properties.ZIndex = value
+				self.Changed:Fire(index, prev)
+			elseif index == "CaptureInput" then
+				if typeof(value) ~= "boolean" then
+					error("Unable to assign property " .. index .. ". boolean expected, got "  .. typeof(value), 2)
+				end
+				local prev = self.CaptureInput
+				self._properties.CaptureInput = value
+				self.Changed:Fire(index, prev)
+			elseif index == "Color" then
+				if typeof(value) ~= "Color3" then
+					error("Unable to assign property " .. index .. ". Color3 expected, got "  .. typeof(value), 2)
+				end
+				
+				self._internal.Drawing.Color = value
+				local prev = self[index]
+				self._properties.Color = value
+				self.Changed:Fire(index, prev)
+			elseif index == "Visible" then
+				if typeof(value) ~= "boolean" then
+					error("Unable to assign property " .. index .. ". boolean expected, got "  .. typeof(value), 2)
+				end
+				
+				self._internal.Drawing.Visible = value
+				local prev = self[index]
+				self._properties.Visible = value
+				self.Changed:Fire(index, prev)
+			elseif index == "Transparency" then
+				if typeof(value) ~= "number" then
+					error("Unable to assign property " .. index .. ". number expected, got "  .. typeof(value), 2)
+				end
+				self._internal.Transparency = FlipTransparency(math.clamp(value, 0, 1))
+				local prev = self[index]
+				self._properties.Transparency = math.clamp(value, 0, 1)
+				self.Changed:Fire(index, prev)
+			elseif index == "AnchorPoint" then
+				if typeof(value) ~= "Vector2" then
+					error("Unable to assign property " .. index .. ". Vector2 expected, got "  .. typeof(value), 2)
+				end
+				
+				self._internal.Drawing.Position = self.Position - (self.Size * value)
+				local prev = self[index]
+				self._properties.AnchorPoint = value
+				self.Changed:Fire(index, prev)
+			elseif self._properties[index] then
+				local prev = self[index]
+				self._properties[index] = value
+				self.Changed:Fire(index, prev)
 			else
-				error(index .. " is not a valid member of EFrame", 2)
+				error(index .. " is not a valid member of Square", 2)
 			end
 		end,
 	})
+	
+	AddToLayer(Square)
+	
+	Square.Changed:Connect(function(property, prev)
+		if property == "ZIndex" then
+			UpdateLayer(Square, prev)
+		end
+	end)
+	
+	table.insert(drawings, Square)
+	
+	return Square
+end
 
-	task.spawn(function()
-		local lastMousePosition = InputService:GetMouseLocation()
-		
-		local function MouseProximityCheck(object, lastPos, newPos)
-			if object.ClassName ~= "EText" then
-				local mouseOver = false
-				if (newPos.X >= object._absolutePosition.X and newPos.X <= (object._absolutePosition.X + object.Size.X)) and (newPos.Y >= object._absolutePosition.Y and newPos.Y <= (object._absolutePosition.Y + object.Size.Y)) then
-					mouseOver = true
-				end
-				
-				if mouseOver == false and object._mouseOver == true then
-					object._events.MouseLeave:Fire(newPos.X, newPos.Y)
-					object._mouseOver = false
-				elseif mouseOver == true and object._mouseOver == false then
-					object._events.MouseEnter:Fire(newPos.X, newPos.Y)
-					object._mouseOver = true
-				end
-			end
-			
-			
-			for index, child in next, object._children do
-				if child._destroyed == false and child._rendered == true then
-					MouseProximityCheck(child, lastPos, newPos)
-				end
+EGUI.CreateText = function(self, args)
+	if not self then
+		error("Expected ':' not '.' calling member function CreateText", 2)
+	end
+	
+	local drawing = Drawing.new("Text")
+	drawing.Size = typeof(args.TextSize) == "number" and args.TextSize or 20
+	drawing.Text = typeof(args.Text) == "string" and args.Text or "Label"
+	drawing.Color = typeof(args.TextColor) == "Color3" and args.TextColor or Color3.fromRGB(0, 0, 0)
+	drawing.Center = false
+	drawing.Font = typeof(args.Font) == "number" and args.Font or Drawing.Fonts.Plex
+	drawing.Position = (typeof(args.Position) == "Vector2" and args.Position or Vector2.new()) - (typeof(args.AnchorPoint) == "Vector2" and args.AnchorPoint or Vector2.new(0, 0)) * drawing.TextBounds
+	drawing.Visible = typeof(args.Visible) == "boolean" and args.Visible or false
+	drawing.ZIndex = typeof(args.ZIndex) == "number" and args.ZIndex or 0
+
+	local Text = {
+		_properties = {
+			Text = drawing.Text,
+			TextColor = drawing.Color,
+			Position = args.Position,
+			TextSize = drawing.Size,
+			TextBounds = drawing.TextBounds,
+			ZIndex = drawing.ZIndex,
+			Visible = drawing.Visible,
+			CaptureInput = typeof(args.CaptureInput) == "boolean" and args.CaptureInput or false,
+			AnchorPoint = typeof(args.AnchorPoint) == "Vector2" and args.AnchorPoint or Vector2.new(0, 0)
+		},
+		_internal = {
+			Drawing = drawing,
+			Type = "Text",
+			_destroyed = false
+		},
+		_events = {
+			MouseButton1Down = Signal.new(),
+			MouseButton1Up = Signal.new(),
+			MouseEnter = Signal.new(),
+			MouseMoved = Signal.new(),
+			MouseLeave = Signal.new(),
+			Changed = Signal.new()
+		}
+	}
+
+	Text.Destroy = function(self)
+		if not self then
+			error("Expected ':' not '.' calling member function Destroy", 2)
+		end
+
+		if self._internal._destroyed then return nil end
+		RemoveFromLayer(self)
+		for index = 1, #drawings do
+			local drawing = drawings[index]
+			if drawing == self then
+				table.remove(drawings, index)
+				break
 			end
 		end
-		
-		while EGUI._destroyed == false do
-			for index, child in next, EGUI._children do
-				if child._destroyed == false then
-					child:_renderUpdate()
-				end
+
+		for index, event in next, self._events do
+			event:DisconnectAll()
+		end
+		self._events = {}
+
+		self._internal.Drawing:Remove()
+		self._internal.Drawing = nil
+	end
+	
+	setmetatable(Text, {
+		__index = function(self, index)
+			if self._properties[index] ~= nil then
+				return self._properties[index]
+			elseif self._events[index] ~= nil and not self._internal._destroyed then
+				return self._events[index]
+			else
+				error(index .. " is not a valid member of Text", 2)
 			end
-			local newMousePosition = InputService:GetMouseLocation()
-			if newMousePosition ~= lastMousePosition then
-				for index, child in next, EGUI._children do
-					if child._destroyed == false and child._rendered == true then
-						MouseProximityCheck(child, lastMousePosition, newMousePosition)
+		end,
+
+		__newindex = function(self, index, value)
+			if self._internal._destroyed then return nil end
+
+			if index == "Position" then
+				if typeof(value) ~= "Vector2" then
+					error("Unable to assign property " .. index .. ". Vector2 expected, got "  .. typeof(value), 2)
+				end
+				self._internal.Drawing.Position = value - (self.TextBounds * self.AnchorPoint)
+				local prev = self[index]
+				self._properties.Position = value
+				self.Changed:Fire(index, prev)
+			elseif index == "TextSize" then
+				if typeof(value) ~= "number" then
+					error("Unable to assign property " .. index .. ". number expected, got "  .. typeof(value), 2)
+				end
+				self._internal.Drawing.Size = value
+				self._internal.Drawing.Position = self.Position - (self._internal.Drawing.TextBounds * self.AnchorPoint)
+				local prevSize = self.TextSize
+				local prevBounds = self.TextBounds
+				self._properties.TextBounds = self._internal.Drawing.TextBounds
+				self.Changed:Fire("TextBounds", prevBounds)
+				self._properties.Size = value
+				self.Changed:Fire(index, prevSize)
+			elseif index == "ZIndex" then
+				if typeof(value) ~= "number" then
+					error("Unable to assign property " .. index .. ". number expected, got "  .. typeof(value), 2)
+				end
+				self._internal.Drawing.ZIndex = value
+				local prev = self[index]
+				self._properties.ZIndex = value
+				self.Changed:Fire(index, prev)
+			elseif index == "CaptureInput" then
+				if typeof(value) ~= "boolean" then
+					error("Unable to assign property " .. index .. ". boolean expected, got "  .. typeof(value), 2)
+				end
+				local prev = self[index]
+				self._properties.CaptureInput = value
+				self.Changed:Fire(index, prev)
+			elseif index == "TextColor" then
+				if typeof(value) ~= "Color3" then
+					error("Unable to assign property " .. index .. ". Color3 expected, got "  .. typeof(value), 2)
+				end
+
+				self._internal.Drawing.Color = value
+				local prev = self[index]
+				self._properties.Color = value
+				self.Changed:Fire(index, prev)
+			elseif index == "Visible" then
+				if typeof(value) ~= "boolean" then
+					error("Unable to assign property " .. index .. ". boolean expected, got "  .. typeof(value), 2)
+				end
+
+				self._internal.Drawing.Visible = value
+				local prev = self[index]
+				self._properties.Visible = value
+				self.Changed:Fire(index, prev)
+			elseif index == "Transparency" then
+				if typeof(value) ~= "number" then
+					error("Unable to assign property " .. index .. ". number expected, got "  .. typeof(value), 2)
+				end
+				self._internal.Transparency = FlipTransparency(math.clamp(value, 0, 1))
+				local prev = self[index]
+				self._properties.Transparency = math.clamp(value, 0, 1)
+				self.Changed:Fire(index, prev)
+			elseif index == "AnchorPoint" then
+				if typeof(value) ~= "Vector2" then
+					error("Unable to assign property " .. index .. ". Vector2 expected, got "  .. typeof(value), 2)
+				end
+
+				self._internal.Drawing.Position = self.Position - (self.TextBounds * value)
+				local prev = self[index]
+				self._properties.AnchorPoint = value
+				self.Changed:Fire(index, prev)
+			elseif index == "Text" then
+				if typeof(value) ~= "string" then
+					error("Unable to assign property " .. index .. ". string expected, got "  .. typeof(value), 2)
+				end
+				self._internal.Drawing.Text = value
+				self._internal.Drawing.Position = self.Position - (self._internal.Drawing.TextBounds * self.AnchorPoint)
+				local prevBounds = self.TextBounds
+				local prevText = self.Text
+				self._properties.TextBounds = self._internal.Drawing.TextBounds
+				self.Changed:Fire("TextBounds", prevBounds)
+				self._properties.Text = value
+				self.Changed:Fire(index, prevText)
+			elseif index == "Font" then
+				if typeof(value) ~= "number" then
+					error("Unable to assign property " .. index .. ". number expected, got "  .. typeof(value), 2)
+				end
+				self._internal.Drawing.Font = math.clamp(value, 0, 3)
+				self._internal.Drawing.Position = self.Position - (self._internal.Drawing.TextBounds * self.AnchorPoint)
+				local prevBounds = self.TextBounds
+				local prevFont = self.Font
+				self._properties.TextBounds = self._internal.Drawing.TextBounds
+				self.Changed:Fire("TextBounds", prevBounds)
+				self._properties.Font = math.clamp(value, 0, 3)
+				self.Changed:Fire(index, prevFont)
+			elseif self._properties[index] then
+				local prev = self[index]
+				self._properties[index] = value
+				self.Changed:Fire(index, prev)
+			else
+				error(index .. " is not a valid member of Text", 2)
+			end
+		end,
+	})
+	
+	AddToLayer(Text)
+
+	Text.Changed:Connect(function(property, prev)
+		if property == "ZIndex" then
+			UpdateLayer(Text, prev)
+		end
+	end)
+
+	table.insert(drawings, Text)
+
+	return Text
+end
+
+InputService.InputBegan:Connect(function(input)
+	if input.UserInputType == Enum.UserInputType.MouseButton1 then
+		local clickPos = Vector2.new(input.Position.X, input.Position.Y + 36)
+		
+		local topmostDrawings = {}
+		local topmostZIndex = -math.huge
+		for index, drawing in next, drawings do
+			if drawing._internal.Type == "Text" then
+				if InBounds(clickPos, drawing._internal.Drawing.Position, drawing.TextBounds) and drawing.Visible and drawing.CaptureInput then
+					if drawing.ZIndex == topmostZIndex then
+						table.insert(topmostDrawings, drawing)
+					elseif drawing.ZIndex > topmostZIndex then
+						topmostDrawings = {}
+						table.insert(topmostDrawings, drawing)
+						topmostZIndex = drawing.ZIndex
 					end
 				end
+			else
+				if InBounds(clickPos, drawing._internal.Drawing.Position, drawing.Size) and drawing.Visible and drawing.CaptureInput then
+					if drawing.ZIndex == topmostZIndex then
+						table.insert(topmostDrawings, drawing)
+					elseif drawing.ZIndex > topmostZIndex then
+						topmostDrawings = {}
+						table.insert(topmostDrawings, drawing)
+						topmostZIndex = drawing.ZIndex
+					end
+				end
+			end
+		end
+		
+		if #topmostDrawings > 0 then
+			for index = #layers[topmostZIndex], 1, -1 do
+				local drawing = layers[topmostZIndex][index]
+				local indexFound = table.find(topmostDrawings, drawing)
+				if indexFound then
+					drawing.MouseButton1Down:Fire(clickPos)
+					break
+				end
+			end
+		end
+	end
+end)
+
+InputService.InputEnded:Connect(function(input)
+	if input.UserInputType == Enum.UserInputType.MouseButton1 then
+		local clickPos = Vector2.new(input.Position.X, input.Position.Y + 36)
+
+		local topmostDrawings = {}
+		local topmostZIndex = -math.huge
+		for index, drawing in next, drawings do
+			if drawing._internal.Type == "Text" then
+				if InBounds(clickPos, drawing._internal.Drawing.Position, drawing.TextBounds) and drawing.Visible and drawing.CaptureInput then
+					if drawing.ZIndex == topmostZIndex then
+						table.insert(topmostDrawings, drawing)
+					elseif drawing.ZIndex > topmostZIndex then
+						topmostDrawings = {}
+						table.insert(topmostDrawings, drawing)
+						topmostZIndex = drawing.ZIndex
+					end
+				end
+			else
+				if InBounds(clickPos, drawing._internal.Drawing.Position, drawing.Size) and drawing.Visible and drawing.CaptureInput then
+					if drawing.ZIndex == topmostZIndex then
+						table.insert(topmostDrawings, drawing)
+					elseif drawing.ZIndex > topmostZIndex then
+						topmostDrawings = {}
+						table.insert(topmostDrawings, drawing)
+						topmostZIndex = drawing.ZIndex
+					end
+				end
+			end
+		end
+
+		if #topmostDrawings > 0 then
+			for index = #layers[topmostZIndex], 1, -1 do
+				local drawing = layers[topmostZIndex][index]
+				local indexFound = table.find(topmostDrawings, drawing)
+				if indexFound then
+					drawing.MouseButton1Up:Fire(clickPos)
+					break
+				end
+			end
+		end
+	end
+end)
+
+task.spawn(function()
+	local drawingsMousedOver = {}
+	local lastMousePos = InputService:GetMouseLocation()
+	while task.wait() do
+		local mousePos = InputService:GetMouseLocation()
+
+		for index = #drawingsMousedOver, 1, -1 do
+			local drawing = drawingsMousedOver[index]
+			
+			if drawing._internal._destroyed then
+				table.remove(drawingsMousedOver, index)
+				continue
+			end
+			
+			if drawing._internal.Type == "Text" then
+				local mousedOver = InBounds(mousePos, drawing._internal.Drawing.Position, drawing.TextBounds)
+				if mousedOver and mousePos ~= lastMousePos then
+					drawing.MouseMoved:Fire(mousePos)
+				elseif not mousedOver then
+					drawing.MouseLeave:Fire(mousePos)
+					table.remove(drawingsMousedOver, index)
+				end
+			else
+				local mousedOver = InBounds(mousePos, drawing._internal.Drawing.Position, drawing.Size)
+				if mousedOver and mousePos ~= lastMousePos then
+					drawing.MouseMoved:Fire(mousePos)
+				elseif not mousedOver then
+					drawing.MouseLeave:Fire(mousePos)
+					table.remove(drawingsMousedOver, index)
+				end
+			end
+		end
+
+		for index, drawing in next, drawings do
+			if drawing._internal._destroyed then
+				continue
+			end
+			
+			if drawing._internal.Type == "Text" then
+				local mousedOver = InBounds(mousePos, drawing._internal.Drawing.Position, drawing.TextBounds)
 				
+				if mousedOver and not table.find(drawingsMousedOver, drawing) then
+					drawing.MouseEnter:Fire(mousePos)
+					table.insert(drawingsMousedOver, drawing)
+				end
+			else
+				local mousedOver = InBounds(mousePos, drawing._internal.Drawing.Position, drawing.Size)
 				
-				lastMousePosition = newMousePosition
-			end
-			RunService.RenderStepped:Wait()
-		end
-	end)
-	
-	local function Mouse1DownCheck(object, pos)
-		if object.ClassName ~= "EText" and object.ClassName == "EButton" then
-			local mouseOver = false
-			if (pos.X >= object._absolutePosition.X and pos.X <= (object._absolutePosition.X + object.Size.X)) and (pos.Y >= object._absolutePosition.Y and pos.Y <= (object._absolutePosition.Y + object.Size.Y)) then
-				mouseOver = true
-			end
-			
-			if mouseOver then
-				object._events.Mouse1Down:Fire(pos.X, pos.Y)
-			end
-			
-			for index, child in next, object._children do
-				if child._destroyed == false and child._rendered == true and child.ClassName == "EButton" then
-					Mouse1DownCheck(child, pos)
+				if mousedOver and not table.find(drawingsMousedOver, drawing) then
+					drawing.MouseEnter:Fire(mousePos)
+					table.insert(drawingsMousedOver, drawing)
 				end
 			end
 		end
+		lastMousePos = mousePos
 	end
-	
-	local function Mouse2DownCheck(object, pos)
-		if object.ClassName ~= "EText" and object.ClassName == "EButton" then
-			local mouseOver = false
-			if (pos.X >= object._absolutePosition.X and pos.X <= (object._absolutePosition.X + object.Size.X)) and (pos.Y >= object._absolutePosition.Y and pos.Y <= (object._absolutePosition.Y + object.Size.Y)) then
-				mouseOver = true
-			end
-
-			if mouseOver then
-				object._events.Mouse2Down:Fire(pos.X, pos.Y)
-			end
-
-			for index, child in next, object._children do
-				if child._destroyed == false and child._rendered == true and child.ClassName == "EButton" then
-					Mouse2DownCheck(child, pos)
-				end
-			end
-		end
-	end
-	
-	local function Mouse3DownCheck(object, pos)
-		if object.ClassName ~= "EText" and object.ClassName == "EButton" then
-			local mouseOver = false
-			if (pos.X >= object._absolutePosition.X and pos.X <= (object._absolutePosition.X + object.Size.X)) and (pos.Y >= object._absolutePosition.Y and pos.Y <= (object._absolutePosition.Y + object.Size.Y)) then
-				mouseOver = true
-			end
-
-			if mouseOver then
-				object._events.Mouse3Down:Fire(pos.X, pos.Y)
-			end
-
-			for index, child in next, object._children do
-				if child._destroyed == false and child._rendered == true and child.ClassName == "EButton" then
-					Mouse3DownCheck(child, pos)
-				end
-			end
-		end
-	end
-	
-	local function Mouse1UpCheck(object, pos)
-		if object.ClassName ~= "EText" and object.ClassName == "EButton" then
-			local mouseOver = false
-			if (pos.X >= object._absolutePosition.X and pos.X <= (object._absolutePosition.X + object.Size.X)) and (pos.Y >= object._absolutePosition.Y and pos.Y <= (object._absolutePosition.Y + object.Size.Y)) then
-				mouseOver = true
-			end
-
-			if mouseOver then
-				object._events.Mouse1Up:Fire(pos.X, pos.Y)
-			end
-
-			for index, child in next, object._children do
-				if child._destroyed == false and child._rendered == true and child.ClassName == "EButton" then
-					Mouse1UpCheck(child, pos)
-				end
-			end
-		end
-	end
-	
-	local function Mouse2UpCheck(object, pos)
-		if object.ClassName ~= "EText" and object.ClassName == "EButton" then
-			local mouseOver = false
-			if (pos.X >= object._absolutePosition.X and pos.X <= (object._absolutePosition.X + object.Size.X)) and (pos.Y >= object._absolutePosition.Y and pos.Y <= (object._absolutePosition.Y + object.Size.Y)) then
-				mouseOver = true
-			end
-
-			if mouseOver then
-				object._events.Mouse2Up:Fire(pos.X, pos.Y)
-			end
-
-			for index, child in next, object._children do
-				if child._destroyed == false and child._rendered == true and child.ClassName == "EButton" then
-					Mouse2UpCheck(child, pos)
-				end
-			end
-		end
-	end
-	
-	local function Mouse3UpCheck(object, pos)
-		if object.ClassName ~= "EText" and object.ClassName == "EButton" then
-			local mouseOver = false
-			if (pos.X >= object._absolutePosition.X and pos.X <= (object._absolutePosition.X + object.Size.X)) and (pos.Y >= object._absolutePosition.Y and pos.Y <= (object._absolutePosition.Y + object.Size.Y)) then
-				mouseOver = true
-			end
-
-			if mouseOver then
-				object._events.Mouse3Up:Fire(pos.X, pos.Y)
-			end
-
-			for index, child in next, object._children do
-				if child._destroyed == false and child._rendered == true and child.ClassName == "EButton" then
-					Mouse3UpCheck(child, pos)
-				end
-			end
-		end
-	end
-	
-	local function MouseWheelForwardCheck(object, pos)
-		if object.ClassName ~= "EText" then
-			local mouseOver = false
-			if (pos.X >= object._absolutePosition.X and pos.X <= (object._absolutePosition.X + object.Size.X)) and (pos.Y >= object._absolutePosition.Y and pos.Y <= (object._absolutePosition.Y + object.Size.Y)) then
-				mouseOver = true
-			end
-			
-			if mouseOver then
-				object._events.MouseWheelForward:Fire(pos.X, pos.Y)
-			end
-			
-			for index, child in next, object._children do
-				if child._destroyed == false and child._rendered == true then
-					MouseWheelForwardCheck(child, pos)
-				end
-			end
-		end
-	end
-	
-	local function MouseWheelBackwardCheck(object, pos)
-		if object.ClassName ~= "EText" then
-			local mouseOver = false
-			if (pos.X >= object._absolutePosition.X and pos.X <= (object._absolutePosition.X + object.Size.X)) and (pos.Y >= object._absolutePosition.Y and pos.Y <= (object._absolutePosition.Y + object.Size.Y)) then
-				mouseOver = true
-			end
-			
-			if mouseOver then
-				object._events.MouseWheelBackward:Fire(pos.X, pos.Y)
-			end
-			
-			for index, child in next, object._children do
-				if child._destroyed == false and child._rendered == true then
-					MouseWheelBackwardCheck(child, pos)
-				end
-			end
-		end
-	end
-	
-	local changedConnection
-	changedConnection = InputService.InputChanged:Connect(function(input)
-		if input.UserInputType == Enum.UserInputType.MouseWheel and input.Position.Z == 1 then
-			for index, child in next, EGUI._children do
-				if child._destroyed == false and child._rendered == true then
-					MouseWheelForwardCheck(child, input.Position)
-				end
-			end
-		elseif input.UserInputType == Enum.UserInputType.MouseWheel and input.Position.Z == -1 then
-			for index, child in next, EGUI._children do
-				if child._destroyed == false and child._rendered == true then
-					MouseWheelBackwardCheck(child, input.Position)
-				end
-			end
-		end
-	end)
-
-	local beganConnection
-	beganConnection = InputService.InputBegan:Connect(function(input)
-		if input.UserInputType == Enum.UserInputType.MouseButton1 then
-			for index, child in next, EGUI._children do
-				if child._destroyed == false and child._rendered == true then
-					Mouse1DownCheck(child, input.Position)
-				end
-			end
-		elseif input.UserInputType == Enum.UserInputType.MouseButton2 then
-			for index, child in next, EGUI._children do
-				if child._destroyed == false and child._rendered == true then
-					Mouse2DownCheck(child, input.Position)
-				end
-			end
-		elseif input.UserInputType == Enum.UserInputType.MouseButton3 then
-			for index, child in next, EGUI._children do
-				if child._destroyed == false and child._rendered == true then
-					Mouse3DownCheck(child, input.Position)
-				end
-			end
-		end
-	end)
-
-	local endedConnection
-	endedConnection = InputService.InputEnded:Connect(function(input)
-		if input.UserInputType == Enum.UserInputType.MouseButton1 then
-			for index, child in next, EGUI._children do
-				if child._destroyed == false and child._rendered == true then
-					Mouse1UpCheck(child, input.Position)
-				end
-			end
-		elseif input.UserInputType == Enum.UserInputType.MouseButton2 then
-			for index, child in next, EGUI._children do
-				if child._destroyed == false and child._rendered == true then
-					Mouse2UpCheck(child, input.Position)
-				end
-			end
-		elseif input.UserInputType == Enum.UserInputType.MouseButton3 then
-			for index, child in next, EGUI._children do
-				if child._destroyed == false and child._rendered == true then
-					Mouse3UpCheck(child, input.Position)
-				end
-			end
-		end
-	end)
-	
-	return EGUI
-end
+end)
 
 return EGUI
